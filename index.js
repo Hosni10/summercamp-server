@@ -9,29 +9,36 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const app = express();
 
 app.use(express.json());
-// app.use(express.static("public"));
+app.use(cors());
 
-const YOUR_DOMAIN = "http://localhost:5000";
+const YOUR_DOMAIN = "http://localhost:5173"; // Update to your frontend URL
 
-app.post("/create-checkout-session", async (req, res) => {
-  const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        // Provide the exact Price ID (for example, price_1234) of the product you want to sell
-        price: "{{PRICE_ID}}",
-        quantity: 1,
+app.post("/create-payment-intent", async (req, res) => {
+  try {
+    const { amount, currency = "aed" } = req.body;
+
+    // Create a PaymentIntent with the order amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: currency,
+      automatic_payment_methods: {
+        enabled: true,
       },
-    ],
-    mode: "payment",
-    success_url: `${YOUR_DOMAIN}?success=true`,
-    cancel_url: `${YOUR_DOMAIN}?canceled=true`,
-  });
+    });
 
-  res.redirect(303, session.url);
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.listen(5000, () => console.log("Running on port 5000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
