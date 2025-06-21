@@ -8,6 +8,9 @@ const cors = require("cors");
 const db = require("./database/dbConnection");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Parent = require("./database/model/parent.model");
+const ConsentForm = require("./database/model/consentForm.model.js");
+const sendEmail = require("./utils/sendEmail");
+const getEmailTemplate = require("./utils/emailTemplate.js");
 const app = express();
 
 app.use(express.json());
@@ -90,6 +93,44 @@ app.post("/api/bookings", async (req, res) => {
 
     console.log("Booking saved successfully:", savedBooking._id);
 
+    // Send confirmation email
+    try {
+      console.log("Preparing to send confirmation email...");
+      const emailHtml = getEmailTemplate({
+        ...savedBooking.toObject(),
+        bookingId: savedBooking._id.toString(),
+      });
+
+      console.log("Email template generated, sending email...");
+      const emailResult = await sendEmail(
+        savedBooking.parentEmail,
+        "Your AFC Sports Summer Camp Booking Confirmation",
+        emailHtml
+      );
+
+      if (emailResult.success) {
+        console.log(
+          `Confirmation email sent successfully to ${savedBooking.parentEmail}`
+        );
+        console.log("Email message ID:", emailResult.messageId);
+        if (emailResult.previewUrl) {
+          console.log("Email preview URL:", emailResult.previewUrl);
+        }
+      } else {
+        console.error("Email sending failed:", emailResult.error);
+      }
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+      console.error("Email error details:", {
+        message: emailError.message,
+        code: emailError.code,
+        command: emailError.command,
+        response: emailError.response,
+      });
+      // Note: The booking was successful, but the email failed.
+      // You might want to handle this case, e.g., by queueing the email for a retry.
+    }
+
     res.status(201).json({
       success: true,
       message: "Booking saved successfully",
@@ -108,6 +149,36 @@ app.post("/api/bookings", async (req, res) => {
       message: "Failed to save booking",
       error: error.message,
       details: error.name === "ValidationError" ? error.errors : null,
+    });
+  }
+});
+
+app.post("/api/consent-forms", async (req, res) => {
+  try {
+    const formData = req.body;
+
+    // Basic validation
+    if (!formData.parentBooking) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing parent booking information.",
+      });
+    }
+
+    const newConsentForm = new ConsentForm(formData);
+    const savedForm = await newConsentForm.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Consent form submitted successfully.",
+      form: savedForm,
+    });
+  } catch (error) {
+    console.error("Error saving consent form:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit consent form.",
+      error: error.message,
     });
   }
 });

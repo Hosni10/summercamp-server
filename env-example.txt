@@ -1,0 +1,16 @@
+# Copy this file to .env and fill in your actual values
+
+# Email Configuration for Office 365
+EMAIL_HOST=smtp.office365.com
+EMAIL_PORT=587
+EMAIL_USER=info@atomicsfootball.com
+EMAIL_PASS=your_actual_email_password_here
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
+
+# Database Configuration (if needed)
+MONGODB_URI=your_mongodb_connection_string_here
+
+# Server Configuration
+PORT=5000 
