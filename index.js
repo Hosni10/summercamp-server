@@ -5,13 +5,17 @@ require("dotenv").config();
 
 const cors = require("cors");
 
+const db = require("./database/dbConnection");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const Parent = require("./database/model/parent.model");
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
 const YOUR_DOMAIN = "http://localhost:5173"; // Update to your frontend URL
+
+db();
 
 app.post("/create-payment-intent", async (req, res) => {
   try {
@@ -31,6 +35,142 @@ app.post("/create-payment-intent", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/bookings", async (req, res) => {
+  try {
+    const bookingData = req.body;
+    console.log("Received booking data:", bookingData);
+
+    // Validate required fields
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "parentEmail",
+      "parentPhone",
+      "parentAddress",
+      "numberOfChildren",
+      "children",
+      "startDate",
+      "plan",
+      "location",
+      "pricing",
+    ];
+    for (const field of requiredFields) {
+      if (!bookingData[field]) {
+        console.error(`Missing required field: ${field}`);
+        return res.status(400).json({
+          success: false,
+          message: `Missing required field: ${field}`,
+          error: `Field ${field} is required`,
+        });
+      }
+    }
+
+    // Create a new parent booking record
+    const newBooking = new Parent({
+      firstName: bookingData.firstName,
+      lastName: bookingData.lastName,
+      parentEmail: bookingData.parentEmail,
+      parentPhone: bookingData.parentPhone,
+      parentAddress: bookingData.parentAddress,
+      numberOfChildren: bookingData.numberOfChildren,
+      children: bookingData.children,
+      startDate: bookingData.startDate,
+      membershipPlan: bookingData.plan.name,
+      location: bookingData.location,
+      totalAmountPaid: bookingData.pricing.finalTotal,
+    });
+
+    console.log("Attempting to save booking:", newBooking);
+
+    // Save to database
+    const savedBooking = await newBooking.save();
+
+    console.log("Booking saved successfully:", savedBooking._id);
+
+    res.status(201).json({
+      success: true,
+      message: "Booking saved successfully",
+      bookingId: savedBooking._id,
+      booking: savedBooking,
+    });
+  } catch (error) {
+    console.error("Error saving booking:", error);
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Failed to save booking",
+      error: error.message,
+      details: error.name === "ValidationError" ? error.errors : null,
+    });
+  }
+});
+
+app.get("/api/bookings", async (req, res) => {
+  try {
+    const bookings = await Parent.find({}).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      bookings: bookings,
+    });
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch bookings",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/api/test-db", async (req, res) => {
+  try {
+    // Test database connection
+    const testBooking = new Parent({
+      firstName: "Test",
+      lastName: "User",
+      parentEmail: "test@example.com",
+      parentPhone: "1234567890",
+      parentAddress: "Test Address",
+      numberOfChildren: 1,
+      children: [
+        {
+          name: "Test Child",
+          age: 8,
+          gender: "boy",
+        },
+      ],
+      startDate: "2024-07-01",
+      membershipPlan: "3-Days Access",
+      location: "abuDhabi",
+      totalAmountPaid: 650,
+    });
+
+    const saved = await testBooking.save();
+    console.log("Test booking saved:", saved._id);
+
+    // Clean up test data
+    await Parent.findByIdAndDelete(saved._id);
+
+    res.json({
+      success: true,
+      message: "Database connection and model working correctly",
+    });
+  } catch (error) {
+    console.error("Database test failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Database test failed",
+      error: error.message,
+    });
   }
 });
 
