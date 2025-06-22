@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const YOUR_DOMAIN = "http://localhost:5173"; // Update to your frontend URL
+const YOUR_DOMAIN = "https://summercamp-client-67a8.vercel.app/"; // Update to your frontend URL
 
 db();
 
