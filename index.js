@@ -20,7 +20,6 @@ app.use(
       "https://summercamp-client-67a8.vercel.app/",
       "http://localhost:5173",
       "https://summercamp-server.onrender.com",
-      
     ],
     credentials: true,
   })
@@ -67,7 +66,6 @@ app.post("/api/bookings", async (req, res) => {
       "children",
       "startDate",
       "plan",
-      "location",
       "pricing",
     ];
     for (const field of requiredFields) {
@@ -92,7 +90,7 @@ app.post("/api/bookings", async (req, res) => {
       children: bookingData.children,
       startDate: bookingData.startDate,
       membershipPlan: bookingData.plan.name,
-      location: bookingData.location,
+      location: bookingData.location || "abuDhabi", // Default to Abu Dhabi
       totalAmountPaid: bookingData.pricing.finalTotal,
     });
 
