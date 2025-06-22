@@ -17,11 +17,16 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "https://summercamp-client-67a8.vercel.app/",
-      "http://localhost:5173",
-      "https://summercamp-server.onrender.com",
+      process.env.DOMAIN_URL,
+      process.env.SERVER_URL,
+      "https://summercamp-client.vercel.app",
+      "https://summercamp-client-67a8.vercel.app", // Keep old domain for backward compatibility
+      "http://localhost:5173", // Keep for development
+      "http://localhost:3000", // Keep for development
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
