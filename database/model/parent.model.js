@@ -12,7 +12,6 @@ const parentSchema = new mongoose.Schema(
     children: [childSchema],
     startDate: { type: String, required: true },
     membershipPlan: { type: String, required: true }, // e.g., "3-Days Access", "5-Days Access"
-    location: { type: String, required: true },
     totalAmountPaid: { type: Number, required: true }, // Final amount after discounts
   },
   { timestamps: true }

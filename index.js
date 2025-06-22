@@ -90,7 +90,6 @@ app.post("/api/bookings", async (req, res) => {
       children: bookingData.children,
       startDate: bookingData.startDate,
       membershipPlan: bookingData.plan.name,
-      location: bookingData.location || "abuDhabi", // Default to Abu Dhabi
       totalAmountPaid: bookingData.pricing.finalTotal,
     });
 
