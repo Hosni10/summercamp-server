@@ -9,14 +9,34 @@ const getEmailTemplate = (bookingData) => {
     children,
     startDate,
     membershipPlan,
-    location,
     totalAmountPaid,
     bookingId,
   } = bookingData;
 
-  // Format children names
+  // Function to calculate age from date of birth
+  const calculateAge = (dateOfBirth) => {
+    if (!dateOfBirth) return null;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Format children names with calculated age
   const childrenNames = children
-    .map((child) => `${child.name} (${child.age} years, ${child.gender})`)
+    .map((child) => {
+      const age = calculateAge(child.dateOfBirth);
+      return `${child.name} (${age} years, ${child.gender})`;
+    })
     .join(", ");
 
   // Format date
@@ -136,10 +156,7 @@ const getEmailTemplate = (bookingData) => {
                                                     <tr>
                                                         <td style="font-weight: 600; color: #495057; font-size: 14px;">Location:</td>
                                                         <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${
-                                                          location ===
-                                                          "abuDhabi"
-                                                            ? "Abu Dhabi"
-                                                            : "Al Ain"
+                                                          location === "Abu Dhabi"
                                                         }</td>
                                                     </tr>
                                                 </table>
