@@ -13,19 +13,26 @@ const sendEmail = require("./utils/sendEmail");
 const getEmailTemplate = require("./utils/emailTemplate.js");
 const app = express();
 
+// Environment variables with fallbacks
+const DOMAIN_URL =
+  process.env.DOMAIN_URL || "https://summercamp-client-67a8.vercel.app";
+const SERVER_URL =
+  process.env.SERVER_URL || "https://summercamp-server.onrender.com";
+
 app.use(express.json());
 app.use(
   cors({
     origin: [
-      "https://summercamp-client-67a8.vercel.app/",
+      DOMAIN_URL,
       "http://localhost:5173",
-      "https://summercamp-server.onrender.com",
+      "http://localhost:3000",
+      SERVER_URL,
     ],
     credentials: true,
   })
 );
 
-const YOUR_DOMAIN = "https://summercamp-client-67a8.vercel.app/"; // Update to your frontend URL
+const YOUR_DOMAIN = DOMAIN_URL; // Use environment variable for frontend URL
 
 db();
 
