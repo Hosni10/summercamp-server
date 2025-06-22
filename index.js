@@ -14,7 +14,15 @@ const getEmailTemplate = require("./utils/emailTemplate.js");
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://summercamp-client-67a8.vercel.app/",
+      "https://summercamp-server.onrender.com",
+    ],
+    credentials: true,
+  })
+);
 
 const YOUR_DOMAIN = "https://summercamp-client-67a8.vercel.app/"; // Update to your frontend URL
 
