@@ -18,7 +18,9 @@ app.use(
   cors({
     origin: [
       "https://summercamp-client-67a8.vercel.app/",
+      "http://localhost:5173",
       "https://summercamp-server.onrender.com",
+      
     ],
     credentials: true,
   })
