@@ -15,7 +15,7 @@ const app = express();
 
 // Environment variables with fallbacks
 const DOMAIN_URL =
-  process.env.DOMAIN_URL || "https://summercamp-client-67a8.vercel.app";
+  process.env.DOMAIN_URL || "https://summercamp-client.vercel.app";
 const SERVER_URL =
   process.env.SERVER_URL || "https://summercamp-server.onrender.com";
 
@@ -24,11 +24,15 @@ app.use(
   cors({
     origin: [
       DOMAIN_URL,
+      "https://summercamp-client.vercel.app",
+      "https://summercamp-client-67a8.vercel.app", // Keep old domain for backward compatibility
       "http://localhost:5173",
       "http://localhost:3000",
       SERVER_URL,
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
