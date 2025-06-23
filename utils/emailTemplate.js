@@ -155,9 +155,9 @@ const getEmailTemplate = (bookingData) => {
                                                 <table width="100%" cellpadding="0" cellspacing="0">
                                                     <tr>
                                                         <td style="font-weight: 600; color: #495057; font-size: 14px;">Location:</td>
-                                                        <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${
-                                                          location === "Abu Dhabi"
-                                                        }</td>
+                                                        <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">
+                                                        Abu Dhabi, UAE
+                                                        </td>
                                                     </tr>
                                                 </table>
                                             </td>
