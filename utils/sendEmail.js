@@ -17,7 +17,7 @@ const sendEmail = async (to, subject, html) => {
 
     // Email options
     const mailOptions = {
-      from: '"AFC Sports" <info@atomicsfootball.com>',
+      from: '"Atomics Football" <info@atomicsfootball.com>',
       to: to,
       subject: subject,
       html: html,

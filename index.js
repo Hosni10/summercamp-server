@@ -13,25 +13,78 @@ const sendEmail = require("./utils/sendEmail");
 const getEmailTemplate = require("./utils/emailTemplate.js");
 const app = express();
 
+// Environment variables with fallbacks
+const DOMAIN_URL =
+  process.env.DOMAIN_URL || "https://summercamp-client.vercel.app";
+const SERVER_URL =
+  process.env.SERVER_URL || "https://summercamp-server.onrender.com";
+
+console.log("Server CORS Configuration:");
+console.log("DOMAIN_URL:", DOMAIN_URL);
+console.log("SERVER_URL:", SERVER_URL);
+
 app.use(express.json());
-app.use(
-  cors({
-    origin: [
-      "https://summercamp-client-67a8.vercel.app/",
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      DOMAIN_URL,
+      SERVER_URL,
+      "https://summercamp-client.vercel.app",
+      "https://summercamp-client-67a8.vercel.app",
       "http://localhost:5173",
-      "https://summercamp-server.onrender.com",
-    ],
-    credentials: true,
-  })
-);
+      "http://localhost:3000",
+    ];
+
+    console.log("Request origin:", origin);
+    console.log("Allowed origins:", allowedOrigins);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log("CORS blocked origin:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+app.use(cors(corsOptions));
+
+// Add preflight handler for OPTIONS requests
+app.options("*", cors(corsOptions));
+
+// Test endpoint to verify CORS is working
+app.get("/test-cors", (req, res) => {
+  console.log("Test CORS endpoint hit");
+  console.log("Request origin:", req.headers.origin);
+  res.json({
+    message: "CORS test successful",
+    timestamp: new Date().toISOString(),
+    origin: req.headers.origin,
+  });
+});
 
 const YOUR_DOMAIN = "https://summercamp-client-67a8.vercel.app/"; // Update to your frontend URL
 
 db();
 
 app.post("/create-payment-intent", async (req, res) => {
+  console.log("Payment intent request received");
+  console.log("Request origin:", req.headers.origin);
+  console.log("Request method:", req.method);
+  console.log("Request headers:", req.headers);
+
   try {
     const { amount, currency = "aed" } = req.body;
+    console.log("Payment intent amount:", amount, "currency:", currency);
 
     // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
@@ -42,10 +95,12 @@ app.post("/create-payment-intent", async (req, res) => {
       },
     });
 
+    console.log("Payment intent created successfully:", paymentIntent.id);
     res.json({
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
+    console.error("Payment intent creation error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -111,7 +166,7 @@ app.post("/api/bookings", async (req, res) => {
       console.log("Email template generated, sending email...");
       const emailResult = await sendEmail(
         savedBooking.parentEmail,
-        "Your AFC Sports Summer Camp Booking Confirmation",
+        "Your Atomics Football Summer Camp Booking Confirmation",
         emailHtml
       );
 
