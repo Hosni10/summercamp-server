@@ -166,7 +166,7 @@ app.post("/api/bookings", async (req, res) => {
       console.log("Email template generated, sending email...");
       const emailResult = await sendEmail(
         savedBooking.parentEmail,
-        "Your AFC Sports Summer Camp Booking Confirmation",
+        "Your Atomics Football Summer Camp Booking Confirmation",
         emailHtml
       );
 
