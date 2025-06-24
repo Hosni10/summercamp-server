@@ -156,7 +156,7 @@ const getEmailTemplate = (bookingData) => {
                                                     <tr>
                                                         <td style="font-weight: 600; color: #495057; font-size: 14px;">Location:</td>
                                                         <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">
-                                                        Abu Dhabi, UAE
+                                                        Adnec, Abu Dhabi summer sports, Abu Dhabi
                                                         </td>
                                                     </tr>
                                                 </table>
@@ -189,7 +189,8 @@ const getEmailTemplate = (bookingData) => {
                                 <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 1px solid #f39c12; border-radius: 12px; padding: 25px; margin: 30px 0;">
                                     <h3 style="color: #856404; margin-bottom: 15px; font-size: 18px;">📋 Important Information</h3>
                                     <ul style="margin: 0; padding-left: 20px; color: #856404;">
-                                        <li style="margin-bottom: 10px; font-size: 14px;"><strong>Check-in Time:</strong> 8:00 AM (Please arrive 15 minutes early)</li>
+                                        <li style="margin-bottom: 10px; font-size: 14px;"><strong>Check-in Time:</strong> 8:30 AM to 8:55 AM</li>
+                                        <li style="margin-bottom: 10px; font-size: 14px;"><strong>Program Start:</strong> 9:00 AM</li>
                                         <li style="margin-bottom: 10px; font-size: 14px;"><strong>Contact:</strong> 050 333 1468 for any questions or concerns</li>
                                         <li style="margin-bottom: 10px; font-size: 14px;"><strong>Weather:</strong> Activities may be adjusted based on weather conditions for safety</li>
                                         <li style="margin-bottom: 10px; font-size: 14px;"><strong>Consent Form:</strong> Please complete the consent form to finalize your booking</li>
