@@ -134,6 +134,26 @@ app.post("/api/bookings", async (req, res) => {
       }
     }
 
+    // Determine plan type
+    function getPlanType(planName) {
+      const kidsCampKeywords = [
+        "1-day",
+        "3-days",
+        "5-days",
+        "10-days",
+        "20-days",
+        "full camp",
+      ];
+      const name = planName ? planName.toLowerCase() : "";
+      for (const keyword of kidsCampKeywords) {
+        if (name.includes(keyword)) {
+          return "Kids Camp";
+        }
+      }
+      return "Football Clinic";
+    }
+    const planType = getPlanType(bookingData.plan.name);
+
     // Create a new parent booking record
     const newBooking = new Parent({
       firstName: bookingData.firstName,
@@ -146,6 +166,7 @@ app.post("/api/bookings", async (req, res) => {
       startDate: bookingData.startDate,
       membershipPlan: bookingData.plan.name,
       totalAmountPaid: bookingData.pricing.finalTotal,
+      planType: planType,
     });
 
     console.log("Attempting to save booking:", newBooking);

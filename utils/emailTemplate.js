@@ -47,13 +47,111 @@ const getEmailTemplate = (bookingData) => {
     day: "numeric",
   });
 
+  // Helper to calculate plan expiry
+  function getPlanExpiry(plan, startDate) {
+    const planName = plan ? plan.toLowerCase() : "";
+    const start = new Date(startDate);
+    let end = null;
+    let note = "";
+    if (planName.includes("1 day")) {
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
+        <li>You can use your <strong>1-day access</strong> on any single day within <strong>1 week (Monday to Friday)</strong> from your chosen start date.</li>
+        <li>Pick any day that works best for you!</li>
+      </ul>`;
+    } else if (
+      planName.includes("3-day") ||
+      planName.includes("3 days") ||
+      planName.includes("1 week") ||
+      planName.includes("3 sessions")
+    ) {
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
+        <li>Your <strong>3-day access</strong> can be used on any <strong>3 days within 1 week (Monday to Friday)</strong> from your chosen start date.</li>
+        <li>Choose any 3 days that fit your schedule!</li>
+      </ul>`;
+    } else if (planName.includes("5-day") || planName.includes("5 days")) {
+      end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
+        <li>Your <strong>5-day access</strong> can be used on any <strong>5 days within 1 week (Monday to Friday)</strong> from your chosen start date.</li>
+        <li>Enjoy a full week of camp fun!</li>
+      </ul>`;
+    } else if (planName.includes("10-day") || planName.includes("10 days")) {
+      end = new Date(start);
+      end.setDate(start.getDate() + 13);
+      note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
+        <li>Your <strong>10-day access</strong> can be used on any <strong>10 days within 2 weeks</strong> from your chosen start date.</li>
+        <li>Mix and match your days for maximum flexibility!</li>
+      </ul>`;
+    } else if (planName.includes("20-day") || planName.includes("20 days")) {
+      end = new Date(start);
+      end.setDate(start.getDate() + 27);
+      note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
+        <li>Your <strong>20-day access</strong> can be used on any <strong>20 days within 1 month</strong> from your chosen start date.</li>
+        <li>Perfect for a full month of summer fun!</li>
+      </ul>`;
+    } else if (
+      planName.includes("full camp") ||
+      planName.includes("full access") ||
+      planName.includes("unlimited")
+    ) {
+      note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
+        <li><strong>Unlimited access</strong> for the full camp duration.</li>
+        <li>Come as often as you like!</li>
+      </ul>`;
+    } else {
+      note = "Access period based on selected plan.";
+    }
+    if (end) {
+      const endStr = end.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      return `${note}<div style='color:#1976d2;font-size:14px;'><strong>Expires on:</strong> ${endStr}</div>`;
+    }
+    return note;
+  }
+
+  // Determine email title and logo alt text based on plan
+  function getEmailBranding(plan) {
+    const kidsCampKeywords = [
+      "1-day",
+      "3-days",
+      "5-days",
+      "10-days",
+      "20-days",
+      "full camp",
+    ];
+    const planName = plan ? plan.toLowerCase() : "";
+    for (const keyword of kidsCampKeywords) {
+      if (planName.includes(keyword)) {
+        return {
+          title: "Atomics Entertainment",
+          logoAlt: "Atomics Entertainment Logo",
+        };
+      }
+    }
+    // Default to Football Clinic branding
+    return {
+      title: "Atomics Football Academy",
+      logoAlt: "Atomics Football Academy Logo",
+    };
+  }
+  const branding = getEmailBranding(membershipPlan);
+  // REMINDER: Update the logo URL to your public server when deploying
+  const logoUrl = `${"http://localhost:5000"}/public/email-logo.jpeg`;
+
   return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Atomics Football Sports Summer Camp - Booking Confirmation</title>
+        <title>${branding.title} - Booking Confirmation</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f8f9fa;">
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa;">
@@ -63,7 +161,9 @@ const getEmailTemplate = (bookingData) => {
                         <!-- Header -->
                         <tr>
                             <td style="background: linear-gradient(135deg, #ed3227 0%, #c41e3a 100%); color: white; padding: 40px 30px; text-align: center;">
-                                <div style="font-size: 32px; font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">Atomics Football</div>
+                                <div style="font-size: 32px; font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">${
+                                  branding.title
+                                }</div>
                                 <div style="font-size: 28px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Summer Camp</div>
                                 <div style="font-size: 16px; opacity: 0.9; font-weight: 300;">Booking Confirmation</div>
                             </td>
@@ -173,6 +273,15 @@ const getEmailTemplate = (bookingData) => {
                                             </td>
                                         </tr>
                                     </table>
+                                </div>
+                                
+                                <!-- Plan Expiry Note -->
+                                <div style="background: #e3f2fd; border-radius: 8px; padding: 18px 24px; margin-bottom: 30px; text-align: left; font-size: 15px; color: #1976d2;">
+                                  <strong>Plan:</strong> ${membershipPlan}<br/>
+                                  <strong>Access:</strong> ${getPlanExpiry(
+                                    membershipPlan,
+                                    startDate
+                                  )}
                                 </div>
                                 
                                 <!-- Welcome Section -->
