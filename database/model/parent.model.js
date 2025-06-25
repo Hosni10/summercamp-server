@@ -13,6 +13,7 @@ const parentSchema = new mongoose.Schema(
     startDate: { type: String, required: true },
     membershipPlan: { type: String, required: true }, // e.g., "3-Days Access", "5-Days Access"
     totalAmountPaid: { type: Number, required: true }, // Final amount after discounts
+    planType: { type: String, required: true }, // 'Kids Camp' or 'Football Clinic'
   },
   { timestamps: true }
 );
