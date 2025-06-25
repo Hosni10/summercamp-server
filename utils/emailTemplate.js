@@ -130,14 +130,14 @@ const getEmailTemplate = (bookingData) => {
     for (const keyword of kidsCampKeywords) {
       if (planName.includes(keyword)) {
         return {
-          title: "Atomics Entertainment",
+          title: "Atomics Sports & Entertainment Summer Camp",
           logoAlt: "Atomics Entertainment Logo",
         };
       }
     }
     // Default to Football Clinic branding
     return {
-      title: "Atomics Football Academy",
+      title: "Atomics Football Clinic",
       logoAlt: "Atomics Football Academy Logo",
     };
   }
@@ -164,7 +164,6 @@ const getEmailTemplate = (bookingData) => {
                                 <div style="font-size: 32px; font-weight: bold; color: white; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">${
                                   branding.title
                                 }</div>
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Summer Camp</div>
                                 <div style="font-size: 16px; opacity: 0.9; font-weight: 300;">Booking Confirmation</div>
                             </td>
                         </tr>

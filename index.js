@@ -154,6 +154,18 @@ app.post("/api/bookings", async (req, res) => {
     }
     const planType = getPlanType(bookingData.plan.name);
 
+    // Determine discount type
+    let discountType = "";
+    let discountCode = bookingData.discountCode || "";
+    let discountPercent = bookingData.discountPercent || 0;
+    if (discountCode === "ADQ20") {
+      discountType = "adq employees";
+    } else if (discountCode === "ad20nec") {
+      discountType = "adnec employees";
+    } else if (discountCode) {
+      discountType = "normal";
+    }
+
     // Create a new parent booking record
     const newBooking = new Parent({
       firstName: bookingData.firstName,
@@ -167,6 +179,9 @@ app.post("/api/bookings", async (req, res) => {
       membershipPlan: bookingData.plan.name,
       totalAmountPaid: bookingData.pricing.finalTotal,
       planType: planType,
+      discountCode: discountCode,
+      discountPercent: discountPercent,
+      discountType: discountType,
     });
 
     console.log("Attempting to save booking:", newBooking);

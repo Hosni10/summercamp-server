@@ -14,6 +14,13 @@ const parentSchema = new mongoose.Schema(
     membershipPlan: { type: String, required: true }, // e.g., "3-Days Access", "5-Days Access"
     totalAmountPaid: { type: Number, required: true }, // Final amount after discounts
     planType: { type: String, required: true }, // 'Kids Camp' or 'Football Clinic'
+    discountCode: { type: String },
+    discountPercent: { type: Number },
+    discountType: {
+      type: String,
+      enum: ["normal", "adq employees", "adnec employees", ""],
+      default: "",
+    },
   },
   { timestamps: true }
 );
