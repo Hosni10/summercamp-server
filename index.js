@@ -186,7 +186,7 @@ app.post("/api/bookings", async (req, res) => {
       }
 
       if (planType === "Kids Camp") {
-        // Kids Camp: 4-13 years
+        // Kids Camp: 4-14 years
         if (age < 4) {
           return res.status(400).json({
             success: false,
@@ -196,12 +196,12 @@ app.post("/api/bookings", async (req, res) => {
             error: `Child ${i + 1} age validation failed`,
           });
         }
-        if (age > 13) {
+        if (age > 14) {
           return res.status(400).json({
             success: false,
             message: `Child ${
               i + 1
-            } must be 13 years old or younger for Kids Camp`,
+            } must be 14 years old or younger for Kids Camp`,
             error: `Child ${i + 1} age validation failed`,
           });
         }
