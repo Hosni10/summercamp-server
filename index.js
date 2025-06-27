@@ -154,6 +154,80 @@ app.post("/api/bookings", async (req, res) => {
     }
     const planType = getPlanType(bookingData.plan.name);
 
+    // Function to calculate age from date of birth
+    function calculateAge(dateOfBirth) {
+      if (!dateOfBirth) return null;
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      return age;
+    }
+
+    // Validate children ages based on plan type
+    for (let i = 0; i < bookingData.children.length; i++) {
+      const child = bookingData.children[i];
+      const age = calculateAge(child.dateOfBirth);
+
+      if (age === null) {
+        return res.status(400).json({
+          success: false,
+          message: `Date of birth is required for child ${i + 1}`,
+          error: `Child ${i + 1} date of birth is required`,
+        });
+      }
+
+      if (planType === "Kids Camp") {
+        // Kids Camp: 4-13 years
+        if (age < 4) {
+          return res.status(400).json({
+            success: false,
+            message: `Child ${
+              i + 1
+            } must be at least 4 years old for Kids Camp`,
+            error: `Child ${i + 1} age validation failed`,
+          });
+        }
+        if (age > 13) {
+          return res.status(400).json({
+            success: false,
+            message: `Child ${
+              i + 1
+            } must be 13 years old or younger for Kids Camp`,
+            error: `Child ${i + 1} age validation failed`,
+          });
+        }
+      } else {
+        // Football Clinic: 4-19 years
+        if (age < 4) {
+          return res.status(400).json({
+            success: false,
+            message: `Child ${
+              i + 1
+            } must be at least 4 years old for Football Clinic`,
+            error: `Child ${i + 1} age validation failed`,
+          });
+        }
+        if (age > 19) {
+          return res.status(400).json({
+            success: false,
+            message: `Child ${
+              i + 1
+            } must be 19 years old or younger for Football Clinic`,
+            error: `Child ${i + 1} age validation failed`,
+          });
+        }
+      }
+    }
+
     // Determine discount type
     let discountType = "";
     let discountCode = bookingData.discountCode || "";

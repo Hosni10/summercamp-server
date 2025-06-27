@@ -24,13 +24,4 @@ childSchema.virtual("age").get(function () {
   return age;
 });
 
-// Add validation for age range (4-12 years)
-childSchema.pre("save", function (next) {
-  const age = this.age;
-  if (age < 4 || age > 12) {
-    return next(new Error("Child must be between 4 and 12 years old"));
-  }
-  next();
-});
-
 module.exports = childSchema;
