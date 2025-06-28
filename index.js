@@ -240,6 +240,72 @@ app.post("/api/bookings", async (req, res) => {
       discountType = "normal";
     }
 
+    // Function to calculate expiry date based on start date and membership plan
+    function calculateExpiryDate(startDate, membershipPlan) {
+      const start = new Date(startDate);
+      let weekdaysToAdd = 0;
+
+      // Extract number of days from membership plan name
+      const planName = membershipPlan.toLowerCase();
+
+      // 1-day, 3-day, 5-day plans: Available within 1 week (Monday to Friday)
+      if (planName.includes("1-day") || planName.includes("1 day")) {
+        weekdaysToAdd = 5; // 5 weekdays (1 week)
+      } else if (planName.includes("3-days") || planName.includes("3 days")) {
+        weekdaysToAdd = 5; // 5 weekdays (1 week)
+      } else if (planName.includes("5-days") || planName.includes("5 days")) {
+        weekdaysToAdd = 5; // 5 weekdays (1 week)
+      }
+      // 10-day and 12-session plans: Available within 2 weeks
+      else if (
+        planName.includes("10-days") ||
+        planName.includes("10 days") ||
+        planName.includes("12-session") ||
+        planName.includes("12 sessions")
+      ) {
+        weekdaysToAdd = 10; // 10 weekdays (2 weeks)
+      }
+      // 20-day and 21-session plans: Available within 1 month
+      else if (
+        planName.includes("20-days") ||
+        planName.includes("20 days") ||
+        planName.includes("21-session") ||
+        planName.includes("21 sessions")
+      ) {
+        weekdaysToAdd = 22; // 22 weekdays (approximately 1 month)
+      }
+      // Full camp plans: Set expiry to end of summer (typically end of August)
+      else if (planName.includes("full camp") || planName.includes("full")) {
+        const expiry = new Date(start);
+        expiry.setMonth(8); // August (0-indexed)
+        expiry.setDate(21); // End of August
+        return expiry.toISOString().split("T")[0]; // Return as YYYY-MM-DD
+      } else {
+        // Default to 5 weekdays if plan is not recognized
+        weekdaysToAdd = 5;
+      }
+
+      // Calculate expiry date by adding weekdays only
+      const expiry = new Date(start);
+      let addedWeekdays = 0;
+
+      while (addedWeekdays < weekdaysToAdd) {
+        expiry.setDate(expiry.getDate() + 1);
+        // Check if it's a weekday (Monday = 1, Tuesday = 2, ..., Friday = 5)
+        if (expiry.getDay() >= 1 && expiry.getDay() <= 5) {
+          addedWeekdays++;
+        }
+      }
+
+      return expiry.toISOString().split("T")[0]; // Return as YYYY-MM-DD
+    }
+
+    // Calculate expiry date
+    const expiryDate = calculateExpiryDate(
+      bookingData.startDate,
+      bookingData.plan.name
+    );
+
     // Create a new parent booking record
     const newBooking = new Parent({
       firstName: bookingData.firstName,
@@ -250,6 +316,7 @@ app.post("/api/bookings", async (req, res) => {
       numberOfChildren: bookingData.numberOfChildren,
       children: bookingData.children,
       startDate: bookingData.startDate,
+      expiryDate: expiryDate,
       membershipPlan: bookingData.plan.name,
       totalAmountPaid: bookingData.pricing.finalTotal,
       planType: planType,
@@ -392,6 +459,7 @@ app.get("/api/test-db", async (req, res) => {
         },
       ],
       startDate: "2024-07-01",
+      expiryDate: "2024-07-03", // 3-day plan
       membershipPlan: "3-Days Access",
       location: "abuDhabi",
       totalAmountPaid: 650,

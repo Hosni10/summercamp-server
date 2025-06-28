@@ -8,6 +8,7 @@ const getEmailTemplate = (bookingData) => {
     numberOfChildren,
     children,
     startDate,
+    expiryDate,
     membershipPlan,
     totalAmountPaid,
     bookingId,
@@ -53,9 +54,18 @@ const getEmailTemplate = (bookingData) => {
     const start = new Date(startDate);
     let end = null;
     let note = "";
+
+    // 1-day, 3-day, 5-day plans: Available within 1 week (Monday to Friday)
     if (planName.includes("1 day")) {
       end = new Date(start);
-      end.setDate(start.getDate() + 6);
+      // Add 5 weekdays
+      let addedWeekdays = 0;
+      while (addedWeekdays < 5) {
+        end.setDate(end.getDate() + 1);
+        if (end.getDay() >= 1 && end.getDay() <= 5) {
+          addedWeekdays++;
+        }
+      }
       note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
         <li>You can use your <strong>1-day access</strong> on any single day within <strong>1 week (Monday to Friday)</strong> from your chosen start date.</li>
         <li>Pick any day that works best for you!</li>
@@ -67,30 +77,72 @@ const getEmailTemplate = (bookingData) => {
       planName.includes("3 sessions")
     ) {
       end = new Date(start);
-      end.setDate(start.getDate() + 6);
+      // Add 5 weekdays
+      let addedWeekdays = 0;
+      while (addedWeekdays < 5) {
+        end.setDate(end.getDate() + 1);
+        if (end.getDay() >= 1 && end.getDay() <= 5) {
+          addedWeekdays++;
+        }
+      }
       note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
         <li>Your <strong>3-day access</strong> can be used on any <strong>3 days within 1 week (Monday to Friday)</strong> from your chosen start date.</li>
         <li>Choose any 3 days that fit your schedule!</li>
       </ul>`;
     } else if (planName.includes("5-day") || planName.includes("5 days")) {
       end = new Date(start);
-      end.setDate(start.getDate() + 6);
+      // Add 5 weekdays
+      let addedWeekdays = 0;
+      while (addedWeekdays < 5) {
+        end.setDate(end.getDate() + 1);
+        if (end.getDay() >= 1 && end.getDay() <= 5) {
+          addedWeekdays++;
+        }
+      }
       note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
         <li>Your <strong>5-day access</strong> can be used on any <strong>5 days within 1 week (Monday to Friday)</strong> from your chosen start date.</li>
         <li>Enjoy a full week of camp fun!</li>
       </ul>`;
-    } else if (planName.includes("10-day") || planName.includes("10 days")) {
+    }
+    // 10-day and 12-session plans: Available within 2 weeks
+    else if (
+      planName.includes("10-day") ||
+      planName.includes("10 days") ||
+      planName.includes("12-session") ||
+      planName.includes("12 sessions")
+    ) {
       end = new Date(start);
-      end.setDate(start.getDate() + 13);
+      // Add 10 weekdays
+      let addedWeekdays = 0;
+      while (addedWeekdays < 10) {
+        end.setDate(end.getDate() + 1);
+        if (end.getDay() >= 1 && end.getDay() <= 5) {
+          addedWeekdays++;
+        }
+      }
       note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
-        <li>Your <strong>10-day access</strong> can be used on any <strong>10 days within 2 weeks</strong> from your chosen start date.</li>
+        <li>Your <strong>10-day/12-session access</strong> can be used on any <strong>10/12 days within 2 weeks</strong> from your chosen start date.</li>
         <li>Mix and match your days for maximum flexibility!</li>
       </ul>`;
-    } else if (planName.includes("20-day") || planName.includes("20 days")) {
+    }
+    // 20-day and 21-session plans: Available within 1 month
+    else if (
+      planName.includes("20-day") ||
+      planName.includes("20 days") ||
+      planName.includes("21-session") ||
+      planName.includes("21 sessions")
+    ) {
       end = new Date(start);
-      end.setDate(start.getDate() + 27);
+      // Add 22 weekdays (approximately 1 month)
+      let addedWeekdays = 0;
+      while (addedWeekdays < 22) {
+        end.setDate(end.getDate() + 1);
+        if (end.getDay() >= 1 && end.getDay() <= 5) {
+          addedWeekdays++;
+        }
+      }
       note = `<ul style='margin: 0 0 8px 0; padding-left: 20px; color: #1976d2; font-size: 14px;'>
-        <li>Your <strong>20-day access</strong> can be used on any <strong>20 days within 1 month</strong> from your chosen start date.</li>
+        <li>Your <strong>20-day/21-session access</strong> can be used on any <strong>20/21 days within 1 month</strong> from your chosen start date.</li>
         <li>Perfect for a full month of summer fun!</li>
       </ul>`;
     } else if (
@@ -243,6 +295,31 @@ const getEmailTemplate = (bookingData) => {
                                             <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
                                                 <table width="100%" cellpadding="0" cellspacing="0">
                                                     <tr>
+                                                        <td style="font-weight: 600; color: #495057; font-size: 14px;">Expiry Date:</td>
+                                                        <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${
+                                                          expiryDate
+                                                            ? new Date(
+                                                                expiryDate
+                                                              ).toLocaleDateString(
+                                                                "en-US",
+                                                                {
+                                                                  weekday:
+                                                                    "long",
+                                                                  year: "numeric",
+                                                                  month: "long",
+                                                                  day: "numeric",
+                                                                }
+                                                              )
+                                                            : "N/A"
+                                                        }</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
+                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                    <tr>
                                                         <td style="font-weight: 600; color: #495057; font-size: 14px;">Plan:</td>
                                                         <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${membershipPlan}</td>
                                                     </tr>
@@ -277,7 +354,10 @@ const getEmailTemplate = (bookingData) => {
                                 <!-- Plan Expiry Note -->
                                 <div style="background: #e3f2fd; border-radius: 8px; padding: 18px 24px; margin-bottom: 30px; text-align: left; font-size: 15px; color: #1976d2;">
                                   <strong>Plan:</strong> ${membershipPlan}<br/>
-                                  <strong>Access:</strong> ${getPlanExpiry(
+                                  <strong>Access Period:</strong> ${startDate} to ${
+    expiryDate || "N/A"
+  }<br/>
+                                  <strong>Note:</strong> ${getPlanExpiry(
                                     membershipPlan,
                                     startDate
                                   )}
