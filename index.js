@@ -396,13 +396,8 @@ app.post("/api/consent-forms", async (req, res) => {
   try {
     const formData = req.body;
 
-    // Basic validation
-    if (!formData.parentBooking) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing parent booking information.",
-      });
-    }
+    // Basic validation (no longer require parentBooking)
+    // You may add other required field checks here if needed
 
     const newConsentForm = new ConsentForm(formData);
     const savedForm = await newConsentForm.save();
