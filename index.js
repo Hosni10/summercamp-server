@@ -232,7 +232,7 @@ app.post("/api/bookings", async (req, res) => {
     let discountType = "";
     let discountCode = bookingData.discountCode || "";
     let discountPercent = bookingData.discountPercent || 0;
-    if (discountCode === "ADQ20") {
+    if (discountCode === "ADQ20@ADSS2025") {
       discountType = "adq employees";
     } else if (discountCode === "ad20nec") {
       discountType = "adnec employees";
