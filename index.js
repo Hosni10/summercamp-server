@@ -318,6 +318,7 @@ app.post("/api/bookings", async (req, res) => {
       startDate: bookingData.startDate,
       expiryDate: expiryDate,
       membershipPlan: bookingData.plan.name,
+      location: bookingData.location,
       totalAmountPaid: bookingData.pricing.finalTotal,
       planType: planType,
       discountCode: discountCode,
