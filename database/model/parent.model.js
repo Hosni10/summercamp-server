@@ -20,7 +20,7 @@ const parentSchema = new mongoose.Schema(
     discountPercent: { type: Number },
     discountType: {
       type: String,
-      enum: ["normal", "adq employees", "adnec employees", ""],
+      enum: ["normal", "adq employees", "adnec employees", "adnec staff", ""],
       default: "",
     },
   },

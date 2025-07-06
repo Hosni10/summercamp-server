@@ -122,6 +122,7 @@ app.post("/api/bookings", async (req, res) => {
       "startDate",
       "plan",
       "pricing",
+      "location",
     ];
     for (const field of requiredFields) {
       if (!bookingData[field]) {
@@ -236,6 +237,8 @@ app.post("/api/bookings", async (req, res) => {
       discountType = "adq employees";
     } else if (discountCode === "ad20nec") {
       discountType = "adnec employees";
+    } else if (discountCode === "Adnecstaff20@adss2025") {
+      discountType = "adnec staff";
     } else if (discountCode) {
       discountType = "normal";
     }
@@ -274,11 +277,9 @@ app.post("/api/bookings", async (req, res) => {
       ) {
         weekdaysToAdd = 22; // 22 weekdays (approximately 1 month)
       }
-      // Full camp plans: Set expiry to end of summer (typically end of August)
+      // Full camp plans: Set expiry to end of summer (August 21st, 2025)
       else if (planName.includes("full camp") || planName.includes("full")) {
-        const expiry = new Date(start);
-        expiry.setMonth(8); // August (0-indexed)
-        expiry.setDate(21); // End of August
+        const expiry = new Date("2025-08-21");
         return expiry.toISOString().split("T")[0]; // Return as YYYY-MM-DD
       } else {
         // Default to 5 weekdays if plan is not recognized
