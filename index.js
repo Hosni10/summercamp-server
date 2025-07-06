@@ -396,21 +396,85 @@ app.post("/api/bookings", async (req, res) => {
 
 app.post("/api/consent-forms", async (req, res) => {
   try {
+    console.log("=== CONSENT FORM SUBMISSION START ===");
+    console.log("Request headers:", req.headers);
+    console.log("Request body:", req.body);
+
     const formData = req.body;
 
-    // Basic validation (no longer require parentBooking)
-    // You may add other required field checks here if needed
+    // Check if ConsentForm model is properly imported
+    if (!ConsentForm) {
+      console.error("ConsentForm model is not defined!");
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error",
+        error: "ConsentForm model not found",
+      });
+    }
 
+    // Remove parentBooking if it's null or undefined to avoid validation errors
+    if (!formData.parentBooking) {
+      delete formData.parentBooking;
+      console.log("Removed parentBooking field as it was null/undefined");
+    }
+
+    // Basic validation - check for required fields
+    const requiredFields = [
+      "kidFullName",
+      "dob",
+      "gender",
+      "address",
+      "parentName",
+      "parentPhone",
+      "parentEmail",
+      "emergencyName",
+      "emergencyRelation",
+      "emergencyPhone1",
+      "emergencyPhone2",
+      "pickupName",
+      "pickupNumber",
+      "guardianName",
+      "guardianSignature",
+    ];
+
+    const missingFields = [];
+    for (const field of requiredFields) {
+      if (!formData[field]) {
+        missingFields.push(field);
+      }
+    }
+
+    if (missingFields.length > 0) {
+      console.error("Missing required fields:", missingFields);
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(", ")}`,
+        error: `Fields ${missingFields.join(", ")} are required`,
+      });
+    }
+
+    console.log("Creating new consent form with data:", formData);
     const newConsentForm = new ConsentForm(formData);
+    console.log("ConsentForm instance created successfully");
+
     const savedForm = await newConsentForm.save();
+    console.log("Consent form saved successfully:", savedForm._id);
 
     res.status(201).json({
       success: true,
       message: "Consent form submitted successfully.",
       form: savedForm,
     });
+    console.log("=== CONSENT FORM SUBMISSION END ===");
   } catch (error) {
+    console.error("=== CONSENT FORM ERROR ===");
     console.error("Error saving consent form:", error);
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    console.error("=== END ERROR ===");
     res.status(500).json({
       success: false,
       message: "Failed to submit consent form.",
@@ -484,6 +548,25 @@ app.get("/api/test-db", async (req, res) => {
 
 app.get("/", (req, res) => {
   res.send("Hello World");
+});
+
+// Test endpoint for consent form debugging
+app.get("/api/test-consent", (req, res) => {
+  try {
+    console.log("Test consent endpoint hit");
+    res.json({
+      success: true,
+      message: "Consent form test endpoint working",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Test consent endpoint error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Test endpoint failed",
+      error: error.message,
+    });
+  }
 });
 
 const PORT = process.env.PORT || 5000;

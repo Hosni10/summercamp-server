@@ -6,7 +6,7 @@ const consentFormSchema = new Schema(
     parentBooking: {
       type: Schema.Types.ObjectId,
       ref: "Parent",
-      required: true,
+      required: false,
     },
     // Kids Details
     kidFullName: { type: String, required: true },
