@@ -52,7 +52,11 @@ const corsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Access-Control-Allow-Origin",
+  ],
   optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
@@ -135,25 +139,52 @@ app.post("/api/bookings", async (req, res) => {
       }
     }
 
-    // Determine plan type
-    function getPlanType(planName) {
-      const kidsCampKeywords = [
-        "1-day",
-        "3-days",
-        "5-days",
-        "10-days",
-        "20-days",
-        "full camp",
-      ];
-      const name = planName ? planName.toLowerCase() : "";
-      for (const keyword of kidsCampKeywords) {
-        if (name.includes(keyword)) {
-          return "Kids Camp";
-        }
+    // Determine plan type based on plan description
+    function getPlanType(planName, planDescription) {
+      // First check the description for unique keywords
+      const description = planDescription ? planDescription.toLowerCase() : "";
+
+      // Football Clinic indicators in description
+      if (
+        description.includes("football") ||
+        description.includes("training")
+      ) {
+        return "Football Clinic";
       }
-      return "Football Clinic";
+
+      // Kids Camp indicators in description
+      if (
+        description.includes("camp") ||
+        description.includes("summer") ||
+        description.includes("monday")
+      ) {
+        return "Kids Camp";
+      }
+
+      // Fallback to checking plan name if description doesn't have clear indicators
+      const name = planName ? planName.toLowerCase() : "";
+
+      // Football Clinic indicators in name
+      if (
+        name.includes("football") ||
+        name.includes("clinic") ||
+        name.includes("session")
+      ) {
+        return "Football Clinic";
+      }
+
+      // Kids Camp indicators in name
+      if (name.includes("camp") || name.includes("day access")) {
+        return "Kids Camp";
+      }
+
+      // Default fallback - if we can't determine, assume Kids Camp
+      return "Kids Camp";
     }
-    const planType = getPlanType(bookingData.plan.name);
+    const planType = getPlanType(
+      bookingData.plan.name,
+      bookingData.plan.description
+    );
 
     // Function to calculate age from date of birth
     function calculateAge(dateOfBirth) {
@@ -340,12 +371,19 @@ app.post("/api/bookings", async (req, res) => {
       const emailHtml = getEmailTemplate({
         ...savedBooking.toObject(),
         bookingId: savedBooking._id.toString(),
+        planDescription: bookingData.plan.description, // Pass the plan description for proper branding
       });
 
       console.log("Email template generated, sending email...");
+      // Determine email subject based on plan type
+      const emailSubject =
+        planType === "Kids Camp"
+          ? "Your Atomics Sports & Entertainment Summer Camp Booking Confirmation"
+          : "Your Atomics Football Clinic Booking Confirmation";
+
       const emailResult = await sendEmail(
         savedBooking.parentEmail,
-        "Your Atomics Football Summer Camp Booking Confirmation",
+        emailSubject,
         emailHtml
       );
 

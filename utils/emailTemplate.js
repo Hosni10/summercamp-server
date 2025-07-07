@@ -12,6 +12,7 @@ const getEmailTemplate = (bookingData) => {
     membershipPlan,
     totalAmountPaid,
     bookingId,
+    planDescription,
   } = bookingData;
 
   // Function to calculate age from date of birth
@@ -92,31 +93,60 @@ const getEmailTemplate = (bookingData) => {
   }
 
   // Determine email title and logo alt text based on plan
-  function getEmailBranding(plan) {
-    const kidsCampKeywords = [
-      "1-day",
-      "3-days",
-      "5-days",
-      "10-days",
-      "20-days",
-      "full camp",
-    ];
-    const planName = plan ? plan.toLowerCase() : "";
-    for (const keyword of kidsCampKeywords) {
-      if (planName.includes(keyword)) {
-        return {
-          title: "Atomics Sports & Entertainment Summer Camp",
-          logoAlt: "Atomics Entertainment Logo",
-        };
-      }
+  function getEmailBranding(plan, planDescription) {
+    // First check the description for unique keywords
+    const description = planDescription ? planDescription.toLowerCase() : "";
+
+    // Football Clinic indicators in description
+    if (description.includes("football") || description.includes("training")) {
+      return {
+        title: "Atomics Football Clinic",
+        logoAlt: "Atomics Football Academy Logo",
+      };
     }
+
+    // Kids Camp indicators in description
+    if (
+      description.includes("camp") ||
+      description.includes("summer") ||
+      description.includes("monday")
+    ) {
+      return {
+        title: "Atomics Sports & Entertainment Summer Camp",
+        logoAlt: "Atomics Entertainment Logo",
+      };
+    }
+
+    // Fallback to checking plan name if description doesn't have clear indicators
+    const planName = plan ? plan.toLowerCase() : "";
+
+    // Football Clinic indicators in name
+    if (
+      planName.includes("football") ||
+      planName.includes("clinic") ||
+      planName.includes("session")
+    ) {
+      return {
+        title: "Atomics Football Clinic",
+        logoAlt: "Atomics Football Academy Logo",
+      };
+    }
+
+    // Kids Camp indicators in name
+    if (planName.includes("camp") || planName.includes("day access")) {
+      return {
+        title: "Atomics Sports & Entertainment Summer Camp",
+        logoAlt: "Atomics Entertainment Logo",
+      };
+    }
+
     // Default to Football Clinic branding
     return {
       title: "Atomics Football Clinic",
       logoAlt: "Atomics Football Academy Logo",
     };
   }
-  const branding = getEmailBranding(membershipPlan);
+  const branding = getEmailBranding(membershipPlan, planDescription);
   // REMINDER: Update the logo URL to your public server when deploying
   const logoUrl = `${"http://localhost:5000"}/public/email-logo.jpeg`;
 
