@@ -144,13 +144,13 @@ app.post("/api/bookings", async (req, res) => {
       // First check the description for unique keywords
       const description = planDescription ? planDescription.toLowerCase() : "";
 
-      // Football Clinic indicators in description
-      if (
-        description.includes("football") ||
-        description.includes("training")
-      ) {
-        return "Football Clinic";
-      }
+      // Football Clinic - disabled for now, re-enable later
+      // if (
+      //   description.includes("football") ||
+      //   description.includes("training")
+      // ) {
+      //   return "Football Clinic";
+      // }
 
       // Kids Camp indicators in description
       if (
@@ -164,14 +164,14 @@ app.post("/api/bookings", async (req, res) => {
       // Fallback to checking plan name if description doesn't have clear indicators
       const name = planName ? planName.toLowerCase() : "";
 
-      // Football Clinic indicators in name
-      if (
-        name.includes("football") ||
-        name.includes("clinic") ||
-        name.includes("session")
-      ) {
-        return "Football Clinic";
-      }
+      // Football Clinic - disabled for now, re-enable later
+      // if (
+      //   name.includes("football") ||
+      //   name.includes("clinic") ||
+      //   name.includes("session")
+      // ) {
+      //   return "Football Clinic";
+      // }
 
       // Kids Camp indicators in name
       if (name.includes("camp") || name.includes("day access")) {
@@ -237,43 +237,35 @@ app.post("/api/bookings", async (req, res) => {
             error: `Child ${i + 1} age validation failed`,
           });
         }
-      } else {
-        // Football Clinic: 4-19 years
-        if (age < 4) {
-          return res.status(400).json({
-            success: false,
-            message: `Child ${
-              i + 1
-            } must be at least 4 years old for Football Clinic`,
-            error: `Child ${i + 1} age validation failed`,
-          });
-        }
-        if (age > 19) {
-          return res.status(400).json({
-            success: false,
-            message: `Child ${
-              i + 1
-            } must be 19 years old or younger for Football Clinic`,
-            error: `Child ${i + 1} age validation failed`,
-          });
-        }
       }
+      // Football Clinic age validation (4-19) - disabled for now, re-enable later
+      // else {
+      //   if (age < 4) { ... }
+      //   if (age > 19) { ... }
+      // }
     }
 
     // Determine discount type
+    const DISCOUNT_CODES_ENABLED = true;
     let discountType = "";
-    let discountCode = bookingData.discountCode || "";
-    let discountPercent = bookingData.discountPercent || 0;
-    if (discountCode === "ADQ20@ADSS2025") {
+    let discountCode = DISCOUNT_CODES_ENABLED
+      ? bookingData.discountCode || ""
+      : "";
+    let discountPercent = DISCOUNT_CODES_ENABLED
+      ? bookingData.discountPercent || 0
+      : 0;
+    if (DISCOUNT_CODES_ENABLED && discountCode === "ADQ20@ADSS2025") {
       discountType = "adq employees";
-    } else if (discountCode === "ad20nec") {
+    } else if (DISCOUNT_CODES_ENABLED && discountCode === "ad20nec") {
       discountType = "adnec employees";
-    } else if (discountCode === "Adnecstaff20@adss2025") {
+    } else if (
+      DISCOUNT_CODES_ENABLED &&
+      discountCode === "Adnecstaff20@adss2025"
+    ) {
       discountType = "adnec staff";
-    } else if (discountCode === "POD50@ADSS2025") {
+    } else if (DISCOUNT_CODES_ENABLED && discountCode === "POD50@ADSS2025") {
       discountType = "pod";
-    }
-    else if (discountCode) {
+    } else if (DISCOUNT_CODES_ENABLED && discountCode) {
       discountType = "normal";
     }
 
@@ -311,9 +303,9 @@ app.post("/api/bookings", async (req, res) => {
       ) {
         weekdaysToAdd = 22; // 22 weekdays (approximately 1 month)
       }
-      // Full camp plans: Set expiry to end of summer (August 21st, 2025)
+      // Full camp plans: Set expiry to end of summer (August 23rd, 2026)
       else if (planName.includes("full camp") || planName.includes("full")) {
-        const expiry = new Date("2025-08-21");
+        const expiry = new Date("2026-08-23");
         return expiry.toISOString().split("T")[0]; // Return as YYYY-MM-DD
       } else {
         // Default to 5 weekdays if plan is not recognized
@@ -380,9 +372,11 @@ app.post("/api/bookings", async (req, res) => {
       console.log("Email template generated, sending email...");
       // Determine email subject based on plan type
       const emailSubject =
-        planType === "Kids Camp"
-          ? "Your Atomics Sports & Entertainment Summer Camp Booking Confirmation"
-          : "Your Atomics Football Clinic Booking Confirmation";
+        "Your Atomics Sports & Entertainment Summer Camp Booking Confirmation";
+      // Football Clinic subject - disabled for now, re-enable later
+      // planType === "Kids Camp"
+      //   ? "Your Atomics Sports & Entertainment Summer Camp Booking Confirmation"
+      //   : "Your Atomics Football Clinic Booking Confirmation";
 
       const emailResult = await sendEmail(
         savedBooking.parentEmail,
@@ -564,7 +558,7 @@ app.get("/api/test-db", async (req, res) => {
       expiryDate: "2024-07-03", // 3-day plan
       membershipPlan: "3-Days Access",
       location: "abuDhabi",
-      totalAmountPaid: 650,
+      totalAmountPaid: 480,
     });
 
     const saved = await testBooking.save();

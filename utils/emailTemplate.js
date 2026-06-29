@@ -97,13 +97,13 @@ const getEmailTemplate = (bookingData) => {
     // First check the description for unique keywords
     const description = planDescription ? planDescription.toLowerCase() : "";
 
-    // Football Clinic indicators in description
-    if (description.includes("football") || description.includes("training")) {
-      return {
-        title: "Atomics Football Clinic",
-        logoAlt: "Atomics Football Academy Logo",
-      };
-    }
+    // Football Clinic - disabled for now, re-enable later
+    // if (description.includes("football") || description.includes("training")) {
+    //   return {
+    //     title: "Atomics Football Clinic",
+    //     logoAlt: "Atomics Football Academy Logo",
+    //   };
+    // }
 
     // Kids Camp indicators in description
     if (
@@ -120,17 +120,17 @@ const getEmailTemplate = (bookingData) => {
     // Fallback to checking plan name if description doesn't have clear indicators
     const planName = plan ? plan.toLowerCase() : "";
 
-    // Football Clinic indicators in name
-    if (
-      planName.includes("football") ||
-      planName.includes("clinic") ||
-      planName.includes("session")
-    ) {
-      return {
-        title: "Atomics Football Clinic",
-        logoAlt: "Atomics Football Academy Logo",
-      };
-    }
+    // Football Clinic - disabled for now, re-enable later
+    // if (
+    //   planName.includes("football") ||
+    //   planName.includes("clinic") ||
+    //   planName.includes("session")
+    // ) {
+    //   return {
+    //     title: "Atomics Football Clinic",
+    //     logoAlt: "Atomics Football Academy Logo",
+    //   };
+    // }
 
     // Kids Camp indicators in name
     if (planName.includes("camp") || planName.includes("day access")) {
@@ -140,10 +140,10 @@ const getEmailTemplate = (bookingData) => {
       };
     }
 
-    // Default to Football Clinic branding
+    // Default to Kids Camp branding (Football Clinic default disabled for now)
     return {
-      title: "Atomics Football Clinic",
-      logoAlt: "Atomics Football Academy Logo",
+      title: "Atomics Sports & Entertainment Summer Camp",
+      logoAlt: "Atomics Entertainment Logo",
     };
   }
   const branding = getEmailBranding(membershipPlan, planDescription);
@@ -350,7 +350,7 @@ const getEmailTemplate = (bookingData) => {
                                 </div>
 
                                 <div style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
-                                    © 2025 Atomic Football Academy. All rights reserved.
+                                    © 2026 Atomic Football Academy. All rights reserved.
                                 </div>
                             </td>
                         </tr>
