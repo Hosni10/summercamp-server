@@ -204,6 +204,37 @@ app.post("/api/bookings", async (req, res) => {
       return age;
     }
 
+    // Validate selectedDays for 1-Day and 3-Days plans
+    const selectedDays = bookingData.selectedDays || [];
+    const planNameLower = bookingData.plan.name.toLowerCase();
+    const is1Day = planNameLower.includes("1-day") || planNameLower.includes("1 day");
+    const is3Days = planNameLower.includes("3-days") || planNameLower.includes("3 days");
+    const validWeekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+    if (is1Day && selectedDays.length !== 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select exactly 1 attendance day for a 1-Day plan.",
+        error: "selectedDays validation failed",
+      });
+    }
+    if (is3Days && selectedDays.length !== 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select exactly 3 attendance days for a 3-Days plan.",
+        error: "selectedDays validation failed",
+      });
+    }
+    for (const day of selectedDays) {
+      if (!validWeekdays.includes(day)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid day selected: "${day}". Only Monday–Friday are allowed.`,
+          error: "selectedDays validation failed",
+        });
+      }
+    }
+
     // Validate children ages based on plan type
     for (let i = 0; i < bookingData.children.length; i++) {
       const child = bookingData.children[i];
@@ -351,6 +382,7 @@ app.post("/api/bookings", async (req, res) => {
       discountCode: discountCode,
       discountPercent: discountPercent,
       discountType: discountType,
+      selectedDays: selectedDays,
     });
 
     console.log("Attempting to save booking:", newBooking);

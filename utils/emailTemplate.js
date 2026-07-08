@@ -13,6 +13,7 @@ const getEmailTemplate = (bookingData) => {
     totalAmountPaid,
     bookingId,
     planDescription,
+    selectedDays,
   } = bookingData;
 
   // Function to calculate age from date of birth
@@ -269,21 +270,33 @@ const getEmailTemplate = (bookingData) => {
                                                 </table>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
-                                                <table width="100%" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td style="font-weight: 600; color: #495057; font-size: 14px;">Plan:</td>
-                                                        <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${membershipPlan}</td>
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
-                                                <table width="100%" cellpadding="0" cellspacing="0">
-                                                    <tr>
-                                                        <td style="font-weight: 600; color: #495057; font-size: 14px;">Location:</td>
+                                                        <tr>
+                                                            <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
+                                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td style="font-weight: 600; color: #495057; font-size: 14px;">Plan:</td>
+                                                                        <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${membershipPlan}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        ${selectedDays && selectedDays.length > 0 ? `
+                                                        <tr>
+                                                            <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
+                                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td style="font-weight: 600; color: #495057; font-size: 14px;">Attending Days:</td>
+                                                                        <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${selectedDays.join(", ")}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        ` : ""}
+                                                        <tr>
+                                                            <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
+                                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td style="font-weight: 600; color: #495057; font-size: 14px;">Location:</td>
                                                         <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">
                                                           ${
                                                             bookingData.location ===

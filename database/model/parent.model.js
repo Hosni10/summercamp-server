@@ -23,6 +23,7 @@ const parentSchema = new mongoose.Schema(
       enum: ["normal", "adq employees", "adnec employees", "adnec staff", ""],
       default: "",
     },
+    selectedDays: { type: [String], default: [] },
   },
   { timestamps: true }
 );
