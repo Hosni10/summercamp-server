@@ -11,6 +11,10 @@ const Parent = require("./database/model/parent.model");
 const ConsentForm = require("./database/model/consentForm.model.js");
 const sendEmail = require("./utils/sendEmail");
 const getEmailTemplate = require("./utils/emailTemplate.js");
+const {
+  validateSelectedDays,
+  calculateExpiryDate,
+} = require("./utils/bookingHelpers.js");
 const app = express();
 
 // Environment variables with fallbacks
@@ -206,33 +210,18 @@ app.post("/api/bookings", async (req, res) => {
 
     // Validate selectedDays for 1-Day and 3-Days plans
     const selectedDays = bookingData.selectedDays || [];
-    const planNameLower = bookingData.plan.name.toLowerCase();
-    const is1Day = planNameLower.includes("1-day") || planNameLower.includes("1 day");
-    const is3Days = planNameLower.includes("3-days") || planNameLower.includes("3 days");
-    const validWeekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const selectedDaysError = validateSelectedDays(
+      bookingData.plan.name,
+      bookingData.location,
+      selectedDays
+    );
 
-    if (is1Day && selectedDays.length !== 1) {
+    if (selectedDaysError) {
       return res.status(400).json({
         success: false,
-        message: "Please select exactly 1 attendance day for a 1-Day plan.",
+        message: selectedDaysError,
         error: "selectedDays validation failed",
       });
-    }
-    if (is3Days && selectedDays.length !== 3) {
-      return res.status(400).json({
-        success: false,
-        message: "Please select exactly 3 attendance days for a 3-Days plan.",
-        error: "selectedDays validation failed",
-      });
-    }
-    for (const day of selectedDays) {
-      if (!validWeekdays.includes(day)) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid day selected: "${day}". Only Monday–Friday are allowed.`,
-          error: "selectedDays validation failed",
-        });
-      }
     }
 
     // Validate children ages based on plan type
@@ -300,69 +289,16 @@ app.post("/api/bookings", async (req, res) => {
       discountType = "normal";
     }
 
-    // Function to calculate expiry date based on start date and membership plan
-    function calculateExpiryDate(startDate, membershipPlan) {
-      const start = new Date(startDate);
-      let weekdaysToAdd = 0;
-
-      // Extract number of days from membership plan name
-      const planName = membershipPlan.toLowerCase();
-
-      // 1-day, 3-day, 5-day plans: Available within 1 week (Monday to Friday)
-      if (planName.includes("1-day") || planName.includes("1 day")) {
-        weekdaysToAdd = 5; // 5 weekdays (1 week)
-      } else if (planName.includes("3-days") || planName.includes("3 days")) {
-        weekdaysToAdd = 5; // 5 weekdays (1 week)
-      } else if (planName.includes("5-days") || planName.includes("5 days")) {
-        weekdaysToAdd = 5; // 5 weekdays (1 week)
-      }
-      // 10-day and 12-session plans: Available within 2 weeks
-      else if (
-        planName.includes("10-days") ||
-        planName.includes("10 days") ||
-        planName.includes("12-session") ||
-        planName.includes("12 sessions")
-      ) {
-        weekdaysToAdd = 10; // 10 weekdays (2 weeks)
-      }
-      // 20-day and 21-session plans: Available within 1 month
-      else if (
-        planName.includes("20-days") ||
-        planName.includes("20 days") ||
-        planName.includes("21-session") ||
-        planName.includes("21 sessions")
-      ) {
-        weekdaysToAdd = 22; // 22 weekdays (approximately 1 month)
-      }
-      // Full camp plans: Set expiry to end of summer (August 23rd, 2026)
-      else if (planName.includes("full camp") || planName.includes("full")) {
-        const expiry = new Date("2026-08-23");
-        return expiry.toISOString().split("T")[0]; // Return as YYYY-MM-DD
-      } else {
-        // Default to 5 weekdays if plan is not recognized
-        weekdaysToAdd = 5;
-      }
-
-      // Calculate expiry date by adding weekdays only
-      const expiry = new Date(start);
-      let addedWeekdays = 0;
-
-      while (addedWeekdays < weekdaysToAdd) {
-        expiry.setDate(expiry.getDate() + 1);
-        // Check if it's a weekday (Monday = 1, Tuesday = 2, ..., Friday = 5)
-        if (expiry.getDay() >= 1 && expiry.getDay() <= 5) {
-          addedWeekdays++;
-        }
-      }
-
-      return expiry.toISOString().split("T")[0]; // Return as YYYY-MM-DD
-    }
-
-    // Calculate expiry date
     const expiryDate = calculateExpiryDate(
       bookingData.startDate,
-      bookingData.plan.name
+      bookingData.plan.name,
+      bookingData.location
     );
+
+    const fullCampDays =
+      bookingData.plan.fullCampDays != null
+        ? bookingData.plan.fullCampDays
+        : undefined;
 
     // Create a new parent booking record
     const newBooking = new Parent({
@@ -376,6 +312,8 @@ app.post("/api/bookings", async (req, res) => {
       startDate: bookingData.startDate,
       expiryDate: expiryDate,
       membershipPlan: bookingData.plan.name,
+      planDescription: bookingData.plan.description || "",
+      fullCampDays: fullCampDays,
       location: bookingData.location,
       totalAmountPaid: bookingData.pricing.finalTotal,
       planType: planType,
@@ -398,7 +336,12 @@ app.post("/api/bookings", async (req, res) => {
       const emailHtml = getEmailTemplate({
         ...savedBooking.toObject(),
         bookingId: savedBooking._id.toString(),
-        planDescription: bookingData.plan.description, // Pass the plan description for proper branding
+        planDescription:
+          bookingData.plan.description || savedBooking.planDescription,
+        fullCampDays:
+          bookingData.plan.fullCampDays != null
+            ? bookingData.plan.fullCampDays
+            : savedBooking.fullCampDays,
       });
 
       console.log("Email template generated, sending email...");

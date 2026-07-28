@@ -1,3 +1,5 @@
+const { getPlanAccessPeriodLabel } = require("./bookingHelpers.js");
+
 const getEmailTemplate = (bookingData) => {
   const {
     firstName,
@@ -13,6 +15,8 @@ const getEmailTemplate = (bookingData) => {
     totalAmountPaid,
     bookingId,
     planDescription,
+    fullCampDays,
+    location,
     selectedDays,
   } = bookingData;
 
@@ -50,48 +54,12 @@ const getEmailTemplate = (bookingData) => {
     day: "numeric",
   });
 
-  // Helper to calculate plan expiry
-  function getPlanExpiry(plan, startDate) {
-    const planName = plan ? plan.toLowerCase() : "";
-    let period = "";
-    if (
-      planName.includes("1 day") ||
-      planName.includes("3-day") ||
-      planName.includes("3 days") ||
-      planName.includes("1 week") ||
-      planName.includes("3 sessions") ||
-      planName.includes("4 days") ||
-      planName.includes("5-day") ||
-      planName.includes("5 days")
-    ) {
-      period = "(within 1 week)";
-    } else if (
-      planName.includes("8 days") ||
-      planName.includes("10-day") ||
-      planName.includes("10 days") ||
-      planName.includes("12-session") ||
-      planName.includes("12 sessions")
-    ) {
-      period = "(within 2 weeks)";
-    } else if (
-      planName.includes("16 days") ||
-      planName.includes("20-day") ||
-      planName.includes("20 days") ||
-      planName.includes("21-session") ||
-      planName.includes("21 sessions")
-    ) {
-      period = "(within 1 month)";
-    } else if (
-      planName.includes("full camp") ||
-      planName.includes("full access") ||
-      planName.includes("unlimited")
-    ) {
-      period = "Full camp duration";
-    } else {
-      period = "Access period based on selected plan.";
-    }
-    return `<div style='color:#1976d2;font-size:14px;'><strong>Access Period:</strong> ${period}</div>`;
-  }
+  const accessPeriodLabel = getPlanAccessPeriodLabel(
+    membershipPlan,
+    location,
+    planDescription,
+    fullCampDays
+  );
 
   // Determine email title and logo alt text based on plan
   function getEmailBranding(plan, planDescription) {
@@ -280,6 +248,18 @@ const getEmailTemplate = (bookingData) => {
                                                                 </table>
                                                             </td>
                                                         </tr>
+                                                        ${planDescription ? `
+                                                        <tr>
+                                                            <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
+                                                                <table width="100%" cellpadding="0" cellspacing="0">
+                                                                    <tr>
+                                                                        <td style="font-weight: 600; color: #495057; font-size: 14px;">Plan Details:</td>
+                                                                        <td style="color: #212529; text-align: right; font-weight: 500; font-size: 14px;">${planDescription}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        ` : ""}
                                                         ${selectedDays && selectedDays.length > 0 ? `
                                                         <tr>
                                                             <td style="padding: 12px 0; border-bottom: 1px solid #e9ecef;">
@@ -325,7 +305,7 @@ const getEmailTemplate = (bookingData) => {
                                 <!-- Plan Expiry Note -->
                                 <div style="background: #e3f2fd; border-radius: 8px; padding: 18px 24px; margin-bottom: 30px; text-align: left; font-size: 15px; color: #1976d2;">
                                   <strong>Plan:</strong> ${membershipPlan}<br/>
-                                  ${getPlanExpiry(membershipPlan, startDate)}
+                                  <div style='color:#1976d2;font-size:14px;'><strong>Access Period:</strong> ${accessPeriodLabel}</div>
                                 </div>
                                 
                                 <!-- Welcome Section -->
